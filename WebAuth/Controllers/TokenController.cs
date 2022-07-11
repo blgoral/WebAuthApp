@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,15 +28,23 @@ public class TokenController : Controller
 
     [Route("/token")]
     [HttpPost]
-    public async Task<IActionResult> Create(string username, string password)
+    public async Task<HttpResponseMessage> Create(string username, string password)
     {
         if (await IsValidUserNameAndPassword(username, password))
         {
-            return new ObjectResult(await GenerateToken(username));
+            var generatedToken = await GenerateToken(username);
+            var cookie = new CookieHeaderValue("Token", generatedToken);
+            
+            var resp = new HttpResponseMessage();
+            resp.StatusCode = HttpStatusCode.OK;
+            resp.Headers.AddCookies(new[] { cookie });
+            return resp;
         }
         else
         {
-            return BadRequest();
+            var resp = new HttpResponseMessage();
+            resp.StatusCode = HttpStatusCode.BadRequest;
+            return resp;
         }
     }
 
@@ -74,11 +84,7 @@ public class TokenController : Controller
                     SecurityAlgorithms.HmacSha256)),
                     new JwtPayload(claims));
 
-        var output = new
-        {
-            Access_Token = new JwtSecurityTokenHandler().WriteToken(token),
-            UserName = username
-        };
+        var output = new JwtSecurityTokenHandler().WriteToken(token);
 
         return output;
     }
