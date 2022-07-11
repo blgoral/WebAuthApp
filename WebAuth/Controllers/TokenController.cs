@@ -38,10 +38,12 @@ public class TokenController : Controller
         }
     }
 
-    private async Task<bool> IsValidUserNameAndPassword(string username, string password)
+    private async Task<bool> IsValidUserNameAndPassword(string? username, string? password)
     {
+        if (username is null || password is null) return false;
         var user = await _userManager.FindByEmailAsync(username);
         return await _userManager.CheckPasswordAsync(user, password);
+
     }
 
     private async Task<dynamic> GenerateToken(string username)
