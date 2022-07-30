@@ -28,25 +28,24 @@ public class TokenController : Controller
 
     [Route("/token")]
     [HttpPost]
-    public async Task<HttpResponseMessage> Create(string username, string password)
+    public async Task<IActionResult> Create(string username, string password)
     {
         if (await IsValidUserNameAndPassword(username, password))
         {
-            var generatedToken = await GenerateToken(username);
-            var cookie = new CookieHeaderValue("Token", generatedToken);
-            cookie.Expires = DateTimeOffset.Now.AddHours(1);
-            cookie.Path = "/";
-            
-            var resp = new HttpResponseMessage();
-            resp.StatusCode = HttpStatusCode.OK;
-            resp.Headers.AddCookies(new[] { cookie });
-            return resp;
+            var token = await GenerateToken(username);
+            var response = new ObjectResult(token);
+            var cookieOptions = new CookieOptions()
+            {
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddHours(1),
+                HttpOnly = true
+            };
+            Response.Cookies.Append("token", token, cookieOptions);
+            return response;
         }
         else
         {
-            var resp = new HttpResponseMessage();
-            resp.StatusCode = HttpStatusCode.BadRequest;
-            return resp;
+            return BadRequest();
         }
     }
 
