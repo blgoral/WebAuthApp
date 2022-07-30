@@ -34,6 +34,8 @@ public class TokenController : Controller
         {
             var generatedToken = await GenerateToken(username);
             var cookie = new CookieHeaderValue("Token", generatedToken);
+            cookie.Expires = DateTimeOffset.Now.AddHours(1);
+            cookie.Path = "/";
             
             var resp = new HttpResponseMessage();
             resp.StatusCode = HttpStatusCode.OK;
