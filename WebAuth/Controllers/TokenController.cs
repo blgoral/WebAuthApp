@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -34,7 +28,7 @@ public class TokenController : Controller
         {
             var token = await GenerateToken(username);
             var response = new ObjectResult(token);
-            var cookieOptions = new CookieOptions()
+            var cookieOptions = new CookieOptions
             {
                 Path = "/",
                 Expires = DateTimeOffset.UtcNow.AddHours(1),
